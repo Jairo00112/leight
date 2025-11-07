@@ -2,24 +2,31 @@ import mysql.connector
 from mysql.connector import Error
 import hashlib
 from datetime import datetime
+import config
+from typing import Any, Dict, cast, Optional
+
 
 class Database:
-    def __init__(self):
-        self.config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "",
-            "database": "control_acceso",
-            "port": 3306
+    def __init__(self, db_config: Optional[dict] = None):
+        # Utiliza la configuración de config.DB_CONFIG por defecto, permite override
+        self.config = db_config or getattr(config, 'DB_CONFIG', None) or {
+            'host': 'localhost', 'user': 'root', 'password': '', 'database': 'control_acceso', 'port': 3306
         }
-    
+
     def conectar(self):
-        """Establecer conexión con la base de datos"""
+        """Establecer conexión con la base de datos usando la configuración proporcionada"""
         try:
-            connection = mysql.connector.connect(**self.config)
+            connection = mysql.connector.connect(
+                host=self.config.get('host'),
+                user=self.config.get('user'),
+                password=self.config.get('password'),
+                database=self.config.get('database'),
+                port=self.config.get('port')
+            )
             return connection
         except Error as e:
-            print(f"Error al conectar a MySQL: {e}")
+            # Mensaje más informativo para debugging
+            print(f"Error al conectar a MySQL ({self.config.get('host')}:{self.config.get('port')}/{self.config.get('database')}): {e}")
             return None
     
     @staticmethod
@@ -39,6 +46,7 @@ def obtener_permisos_usuario(usuario_id):
     if not conn:
         return []
     
+    cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
@@ -49,15 +57,23 @@ def obtener_permisos_usuario(usuario_id):
             JOIN permisos p ON rp.permiso_id = p.id
             WHERE u.id = %s AND u.estado = 'activo'
         """, (usuario_id,))
-        
         permisos = cursor.fetchall()
+        # Forzar tipo dict para el analizador estático y permitir indexación por claves
+        permisos = [cast(Dict[str, Any], p) for p in permisos] if permisos else []
         return [f"{p['modulo']}.{p['nombre']}" for p in permisos]
     except Error as e:
         print(f"Error al obtener permisos: {e}")
         return []
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            if cursor is not None:
+                cursor.close()
+        except Exception:
+            pass
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 def tiene_permiso(usuario_id, permiso_requerido):
     """Verificar si un usuario tiene un permiso específico"""
@@ -75,6 +91,7 @@ def obtener_usuario_actual():
     if not conn:
         return None
     
+    cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
@@ -86,11 +103,20 @@ def obtener_usuario_actual():
         
         usuario = cursor.fetchone()
         if usuario:
-            usuario['permisos'] = obtener_permisos_usuario(usuario['id'])
+            # Forzar tipo dict para el analizador estático y permitir asignaciones
+            usuario = cast(Dict[str, Any], usuario)
+            usuario['permisos'] = obtener_permisos_usuario(usuario.get('id'))
         return usuario
     except Exception as e:
         print(f"Error al obtener usuario actual: {e}")
         return None
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            if cursor is not None:
+                cursor.close()
+        except Exception:
+            pass
+        try:
+            conn.close()
+        except Exception:
+            pass
