@@ -1,5 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
+from utils.db_utils import get_connection
 import hashlib
 from datetime import datetime
 import config
@@ -16,13 +17,8 @@ class Database:
     def conectar(self):
         """Establecer conexión con la base de datos usando la configuración proporcionada"""
         try:
-            connection = mysql.connector.connect(
-                host=self.config.get('host'),
-                user=self.config.get('user'),
-                password=self.config.get('password'),
-                database=self.config.get('database'),
-                port=self.config.get('port')
-            )
+            # Usar el pool de conexiones en lugar de crear una nueva cada vez
+            connection = get_connection()
             return connection
         except Error as e:
             # Mensaje más informativo para debugging
