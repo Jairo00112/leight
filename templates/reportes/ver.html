@@ -31,10 +31,10 @@
                 <i class="bi bi-arrow-left"></i> Volver
             </a>
             <div class="d-flex gap-2">
-                <a href="{{ url_for('exportar_reporte_csv') }}" class="btn btn-primary">
+                <a href="{{ url_for('exportar_reporte_csv') }}" class="btn btn-primary" style="background:linear-gradient(90deg,#3A506B,#5BC0BE);color:#F4F4F4;">
                     <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
                 </a>
-                <a href="{{ url_for('exportar_reporte_pdf') }}" class="btn btn-primary">
+                <a href="{{ url_for('exportar_reporte_pdf') }}" class="btn btn-primary" style="background:linear-gradient(90deg,#3A506B,#5BC0BE);color:#F4F4F4;">
                     <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
                 </a>
             </div>
@@ -57,7 +57,7 @@
                         <tbody>
                             {% for acceso in accesos %}
                             <tr>
-                                <td>{{ acceso.fecha_hora.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ acceso.fecha_hora.strftime('%Y-%m-%d %I:%M %p') }}</td>
                                 <td>{{ acceso.visitante or 'N/A' }}</td>
                                 <td>
                                     {% if acceso.tipo == 'entrada' %}
@@ -90,4 +90,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+    </div>
+</div>
+
 {% endblock %}
