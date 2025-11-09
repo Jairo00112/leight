@@ -227,7 +227,7 @@ def exportar_reporte_csv():
         # Escribir datos
         for acceso in accesos:
             writer.writerow([
-                acceso['fecha_hora'].strftime('%Y-%m-%d %H:%M'),
+                acceso['fecha_hora'].strftime('%Y-%m-%d %I:%M %p'),
                 acceso['visitante'] or 'N/A',
                 acceso['identificacion'] or 'N/A',
                 acceso['empresa'] or 'N/A',
