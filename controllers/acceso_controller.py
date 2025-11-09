@@ -3,6 +3,7 @@ from models.database import Database
 from auth.auth import login_required, permiso_requerido
 from auth.permissions import *
 from datetime import datetime
+from utils.acceso_utils import normalizar_tipo_acceso
 
 @login_required
 @permiso_requerido(CONTROL_ACCESO)
@@ -10,7 +11,7 @@ def control_acceso():
     """Control de acceso - registrar entradas y salidas"""
     if request.method == 'POST':
         codigo = request.form['codigo']
-        tipo = request.form['tipo']  # 'entrada' o 'salida'
+        tipo = normalizar_tipo_acceso(request.form['tipo'])  # normalizar a 'entrada' o 'salida'
         
         db = Database()
         conn = db.conectar()
