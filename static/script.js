@@ -27,9 +27,39 @@ function enhanceForms() {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         const firstInput = form.querySelector('input[type="text"], input[type="email"], input[type="password"]');
+            // Usar delegación de eventos para los alerts
+            document.body.addEventListener('click', function(e) {
+                if (e.target.matches('.alert .btn-close')) {
+                    const alert = e.target.closest('.alert');
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+    
+            // Auto-dismiss alerts usando un solo temporizador
+            const alerts = document.querySelectorAll('.alert:not(.alert-important)');
+            if (alerts.length) {
+                setTimeout(() => {
+                    alerts.forEach(alert => {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    });
+                }, 5000);
+            }
         if (firstInput && !firstInput.value) {
+            // Delegación de eventos para formularios
+            document.body.addEventListener('submit', handleFormSubmit);
+            document.body.addEventListener('input', handleFormInput);
             firstInput.focus();
+            // Optimizar tablas solo si existen
+            if (document.querySelector('table')) {
+                enhanceTables();
+            }
         }
+            // Inicializar dashboard solo si estamos en esa página
+            if (document.querySelector('#dashboard')) {
+                initDashboard();
+            }
     });
 
     // Validación en tiempo real para contraseñas
@@ -54,13 +84,16 @@ function enhanceForms() {
 
 // Validación de contraseñas
 function validatePassword(input) {
-    const value = input.value;
-    const feedback = document.getElementById(`${input.id}-feedback`) || createPasswordFeedback(input);
-    
+    // Obtener o crear elemento de feedback asociado al input
+    let feedback = document.getElementById(`${input.id}-feedback`) || createPasswordFeedback(input);
+
+    const value = (input && input.value) ? input.value : '';
+
     if (value.length > 0 && value.length < 8) {
         feedback.textContent = 'La contraseña debe tener al menos 8 caracteres';
         feedback.className = 'form-text text-danger';
         input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
     } else if (value.length >= 8) {
         feedback.textContent = 'Contraseña válida';
         feedback.className = 'form-text text-success';
@@ -69,9 +102,11 @@ function validatePassword(input) {
     } else {
         feedback.textContent = 'Mínimo 8 caracteres';
         feedback.className = 'form-text text-muted';
-        input.classList.remove('is-invalid', 'is-valid');
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
     }
 }
+
 
 function createPasswordFeedback(input) {
     const feedback = document.createElement('div');
