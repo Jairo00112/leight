@@ -5,6 +5,7 @@ from auth.permissions import VER_REPORTES, GENERAR_REPORTES, EXPORTAR_REPORTES
 import csv
 import io
 from datetime import datetime, timedelta
+from utils.time_utils import app_now
 from utils.pdf_utils import generar_pdf_reporte
 
 @login_required
@@ -51,8 +52,8 @@ def generar_reporte():
             return redirect(url_for('ver_reporte'))
     
     # Fechas por defecto
-    hoy = datetime.now().strftime('%Y-%m-%d')
-    primer_dia_mes = datetime.now().replace(day=1).strftime('%Y-%m-%d')
+    hoy = app_now().strftime('%Y-%m-%d')
+    primer_dia_mes = app_now().replace(day=1).strftime('%Y-%m-%d')
     
     return render_template('reportes/generar.html', 
                          hoy=hoy, 
@@ -148,7 +149,7 @@ def ver_reporte():
                              tipo=tipo,
                              fecha_inicio=fecha_inicio,
                              fecha_fin=fecha_fin,
-                             now=datetime.now())
+                             now=app_now())
         
     except Exception as e:
         print(f"Error al generar reporte: {e}")
