@@ -10,6 +10,7 @@ try:
 except Exception:
     ZoneInfo = None
 from utils.acceso_utils import normalizar_tipo_acceso
+from utils.time_utils import app_now_time
 
 @login_required
 @permiso_requerido(CONTROL_ACCESO)
@@ -47,11 +48,11 @@ def control_acceso():
                         tz = ZoneInfo(config.APP_TIMEZONE)
                         hora_actual = datetime.now(tz).time()
                     except Exception:
-                        # Fallback a hora del sistema
-                        hora_actual = datetime.now().time()
+                        # Fallback a hora de la app (sensible a TZ)
+                        hora_actual = app_now_time()
                 else:
-                    # zoneinfo no disponible, fallback a hora del sistema
-                    hora_actual = datetime.now().time()
+                    # zoneinfo no disponible, fallback a hora de la app
+                    hora_actual = app_now_time()
                 hora_inicio = datetime.strptime('08:00', '%H:%M').time()
                 hora_fin = datetime.strptime('18:00', '%H:%M').time()
                 
