@@ -3,7 +3,8 @@ from models.database import Database
 from auth.auth import login_required, permiso_requerido
 from auth.permissions import *
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
+from utils.time_utils import app_now
 
 @login_required
 @permiso_requerido(VER_VISITANTES)
@@ -93,7 +94,7 @@ def agregar_visitante():
             # Generar credencial si se solicitó
             if generar_credencial == 'si':
                 codigo = str(uuid.uuid4())[:8].upper()
-                fecha_expiracion = datetime.now() + timedelta(hours=8)
+                fecha_expiracion = app_now() + timedelta(hours=8)
                 
                 cursor.execute("""
                     INSERT INTO credenciales (visitante_id, codigo, estado, fecha_expiracion)
